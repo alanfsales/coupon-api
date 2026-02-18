@@ -2,8 +2,6 @@
 
 API REST para gerenciamento de cupons de desconto, desenvolvida como desafio técnico.
 
----
-
 ## Tecnologias Utilizadas
 
 - Java 17
@@ -32,21 +30,15 @@ O projeto segue princípios de separação de responsabilidades:
 
 Regras de negócio estão encapsuladas na entidade de domínio.
 
----
-
 ## Documentação da API (Swagger)
 
 Após subir a aplicação, acesse: http://localhost:8080/swagger-ui/index.html
-
----
 
 ## Banco de Dados (H2)
 
 Console do banco disponível em:
 
 http://localhost:8080/h2-console
-
----
 
 ## Como executar o projeto
 
@@ -72,14 +64,10 @@ mvn clean install
 java -jar target/coupon-api-0.0.1-SNAPSHOT.jar
 ```
 
----
-
 ## Executando os testes
 ```bash
 mvn test 
 ```
-
----
 
 ## Autor
 
