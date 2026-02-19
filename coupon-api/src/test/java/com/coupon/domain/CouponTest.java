@@ -1,13 +1,13 @@
 package com.coupon.domain;
 
+import com.coupon.exception.BadRequestBusinessRuleException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CouponTest {
 
@@ -22,7 +22,7 @@ class CouponTest {
 
     @Test
     void deveLancarErroQuandoCodigoNaoTiverSeisCaracteres() {
-        Assertions.assertThrows(ResponseStatusException.class, () ->
+        Assertions.assertThrows(BadRequestBusinessRuleException.class, () ->
                 new Coupon(
                         "ABC-1",
                         "Descrição ",
@@ -35,7 +35,7 @@ class CouponTest {
 
     @Test
     void deveLancarErroQuandoDescontoMenorQueMinimo() {
-        Assertions.assertThrows(ResponseStatusException.class, () ->
+        Assertions.assertThrows(BadRequestBusinessRuleException.class, () ->
                 new Coupon(
                         "ABC123",
                         "Descrição do cupom",
@@ -48,7 +48,7 @@ class CouponTest {
 
     @Test
     void deveLancarErroQuandoDataExpiracaoNoPassado() {
-        Assertions.assertThrows(ResponseStatusException.class, () ->
+        Assertions.assertThrows(BadRequestBusinessRuleException.class, () ->
                 new Coupon(
                         "ABC123",
                         "Descrição",

@@ -1,7 +1,8 @@
 package com.coupon.controller;
 
-import com.coupon.domain.Coupon;
+import com.coupon.domain.CouponStatus;
 import com.coupon.dto.CouponDTO;
+import com.coupon.dto.CouponResponseDTO;
 import com.coupon.service.CouponService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,37 +40,38 @@ class CouponControllerTest {
     @MockBean
     private CouponService service;
 
-    private Coupon coupon;
     private CouponDTO couponDTO;
+    private CouponResponseDTO responseDTO;
 
     @BeforeEach
     void setUp(){
         couponDTO = new CouponDTO("ABC-123", "Descrição do cupom", new BigDecimal("0.8"),
                 LocalDateTime.now().plusDays(10), false);
-        coupon = new Coupon("ABC-123", "Descrição do cupom", new BigDecimal("0.8"),
-                LocalDateTime.now().plusDays(10),false);
+        responseDTO = new CouponResponseDTO(UUID.fromString("b5aa498f-2f64-4c4a-827b-bef0c915acd5"),
+                "ABC123", "Descrição do cupom", new BigDecimal("0.8"),
+                LocalDateTime.now().plusDays(10), CouponStatus.ACTIVE,false, false);
     }
 
     @Test
     void deveCriarCupomComSucesso() throws Exception {
-        given(service.save(Mockito.any())).willReturn(coupon);
+        given(service.create(Mockito.any())).willReturn(responseDTO);
 
-        mvc.perform(post("/coupon")
+        mvc.perform(post("/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(couponDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value("ABC123"));
 
-        then(service).should().save(Mockito.any());
+        then(service).should().create(Mockito.any());
     }
 
     @Test
     void deveRetornarCupomQuandoExistir() throws Exception {
         UUID id = UUID.randomUUID();
 
-        given(service.findById(id)).willReturn(coupon);
+        given(service.findById(id)).willReturn(responseDTO);
 
-        mvc.perform(get("/coupon/{id}", id))
+        mvc.perform(get("/coupons/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("ABC123"))
                 .andExpect(jsonPath("$.description").value("Descrição do cupom"));
@@ -88,7 +90,7 @@ class CouponControllerTest {
                         "Cupom não encontrado"
                 ));
 
-        mvc.perform(get("/coupon/{id}", id))
+        mvc.perform(get("/coupons/{id}", id))
                 .andExpect(status().isNotFound());
 
         then(service).should().findById(id);
@@ -100,12 +102,12 @@ class CouponControllerTest {
 
         willDoNothing()
                 .given(service)
-                .delete(id);
+                .deleteById(id);
 
-        mvc.perform(delete("/coupon/{id}", id))
+        mvc.perform(delete("/coupons/{id}", id))
                 .andExpect(status().isNoContent());
 
-        then(service).should().delete(id);
+        then(service).should().deleteById(id);
     }
 
     @Test
@@ -121,7 +123,7 @@ class CouponControllerTest {
         }
         """;
 
-        mvc.perform(post("/coupon")
+        mvc.perform(post("/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
@@ -142,10 +144,10 @@ class CouponControllerTest {
         }
         """;
 
-        Mockito.when(service.save(Mockito.any()))
+        Mockito.when(service.create(Mockito.any()))
                 .thenThrow(new DataIntegrityViolationException("erro"));
 
-        mvc.perform(post("/coupon")
+        mvc.perform(post("/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isConflict())

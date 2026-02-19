@@ -20,7 +20,7 @@ public record CouponDTO(
         @NotNull(message = "O campo  expirationDate é obrigatória")
         LocalDateTime expirationDate,
 
-        Boolean published
+        boolean published
 
 ) {
 }

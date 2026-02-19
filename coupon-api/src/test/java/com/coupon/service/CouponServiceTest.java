@@ -3,6 +3,8 @@ package com.coupon.service;
 import com.coupon.domain.Coupon;
 import com.coupon.domain.CouponStatus;
 import com.coupon.dto.CouponDTO;
+import com.coupon.dto.CouponResponseDTO;
+import com.coupon.exception.ConflictBusinessRuleException;
 import com.coupon.mapper.CouponMapper;
 import com.coupon.repository.CouponRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,7 @@ class CouponServiceTest {
 
     private Coupon coupon;
     private CouponDTO couponDTO;
+    private CouponResponseDTO responseDTO;
 
     @BeforeEach
     void setUp(){
@@ -44,17 +47,21 @@ class CouponServiceTest {
                 LocalDateTime.now().plusDays(10), false);
         coupon = new Coupon("ABC-123", "Descrição do cupom", new BigDecimal("0.8"),
                 LocalDateTime.now().plusDays(10),false);
+        responseDTO = new CouponResponseDTO(UUID.fromString("b5aa498f-2f64-4c4a-827b-bef0c915acd5"),
+                "ABC123", "Descrição do cupom", new BigDecimal("0.8"),
+                LocalDateTime.now().plusDays(10), CouponStatus.ACTIVE,false, false);
     }
 
     @Test
     void deveSalvarCupomComSucesso() {
         given(mapper.toEntity(couponDTO)).willReturn(coupon);
         given(repository.save(coupon)).willReturn(coupon);
+        given(mapper.toResponse(coupon)).willReturn(responseDTO);
 
-        Coupon result = service.save(couponDTO);
+        CouponResponseDTO result = service.create(couponDTO);
 
         assertNotNull(result);
-        assertEquals(coupon, result);
+        assertEquals(responseDTO, result);
 
         then(mapper).should().toEntity(couponDTO);
         then(repository).should().save(coupon);
@@ -66,11 +73,12 @@ class CouponServiceTest {
         UUID id = UUID.randomUUID();
 
         given(repository.findById(id)).willReturn(Optional.of(coupon));
+        given(mapper.toResponse(coupon)).willReturn(responseDTO);
 
-        Coupon result = service.findById(id);
+        CouponResponseDTO result = service.findById(id);
 
         assertNotNull(result);
-        assertEquals(coupon, result);
+        assertEquals(responseDTO, result);
 
         then(repository).should().findById(id);
     }
@@ -98,7 +106,7 @@ class CouponServiceTest {
 
         given(repository.findById(id)).willReturn(Optional.of(coupon));
 
-        service.delete(id);
+        service.deleteById(id);
 
         then(repository).should().findById(id);
 
@@ -113,8 +121,8 @@ class CouponServiceTest {
         given(repository.findById(id)).willReturn(Optional.of(coupon));
 
         assertThrows(
-                ResponseStatusException.class,
-                () -> service.delete(id)
+                ConflictBusinessRuleException.class,
+                () -> service.deleteById(id)
         );
 
         then(repository).should().findById(id);
